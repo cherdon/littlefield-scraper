@@ -1,6 +1,7 @@
 import os
 from app import app
 from flask import render_template, redirect, Response, url_for, request
+from flask_csv import send_csv
 from app.scraper import LoginForm, scrape
 from selenium import webdriver
 from contextlib import contextmanager
@@ -45,23 +46,43 @@ def home():
         except:
             pass
         with driver_context() as driver:
-            df = scrape(driver, form.username.data, form.password.data)
-        return render_template('data_ready.html', data=df.to_html())
+            df, ls = scrape(driver, form.username.data, form.password.data)
+        return send_csv(ls,
+                        "latest-littlefield.csv",
+                        ["Day",
+                         "Customer Orders",
+                         "Queued Orders",
+                         "Inventory Level",
+                         "Machine 1 Utilisation Rate",
+                         "Machine 2 Utilisation Rate",
+                         "Machine 3 Utilisation Rate",
+                         "Machine 1 Queue",
+                         "Machine 2 Queue",
+                         "Machine 3 Queue",
+                         "Completed Jobs Tier 1",
+                         "Completed Jobs Tier 2",
+                         "Completed Jobs Tier 3",
+                         "Avg Lead Time Tier 1",
+                         "Avg Lead Time Tier 2",
+                         "Avg Lead Time Tier 3",
+                         "Avg Revenue Tier 1",
+                         "Avg Revenue Tier 2",
+                         "Avg Revenue Tier 3"])
     return render_template('index.html', form=form)
 
 
-@app.route('/data')
-def data_load():
-    return render_template('data_ready.html')
-
-
-@app.route('/download')
-def plot_csv():
-    file_path = os.path.join(os.path.dirname(__name__), os.path.pardir, 'output', 'latest-littlefield.csv')
-    with open(file_path) as file:
-        csv_file = file.read
-    resp = Response(csv_file,
-                    mimetype='text/csv',
-                    headers={"Content-disposition":
-                             "attachment; filename=latest-littlefield.csv"})
-    return resp
+# @app.route('/data')
+# def data_load():
+#     return render_template('data_ready.html')
+#
+#
+# @app.route('/download')
+# def plot_csv():
+#     file_path = os.path.join(os.path.dirname(__name__), os.path.pardir, 'output', 'latest-littlefield.csv')
+#     with open(file_path) as file:
+#         csv_file = file.read
+#     resp = Response(csv_file,
+#                     mimetype='text/csv',
+#                     headers={"Content-disposition":
+#                              "attachment; filename=latest-littlefield.csv"})
+#     return resp

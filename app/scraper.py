@@ -114,10 +114,15 @@ def scrape(driver, username, password):
     df = dict()
     df = without_split(driver, df)
     df = split_category(driver, df)
-    for key in df:
-        print(key)
-        print(len(df[key]))
-    df = pd.DataFrame.from_dict(df)
-    df.to_csv(app.config['OUTPUT_PATH'])
-    return df
+    ls = list()
+    length = len(df['Customer Orders'])
+    for i in range(length):
+        elem = dict()
+        for key, value in df.items():
+            elem[key] = value[i]
+        elem['Day'] = int(i) + 1
+        ls.append(elem)
+    # df = pd.DataFrame.from_dict(df)
+    # df.to_csv(app.config['OUTPUT_PATH'])
+    return df, ls
 
